@@ -1,4 +1,4 @@
-class FreeTransfer {
+module.exports = class FreeTransfer {
     to;
     from;
     amount;

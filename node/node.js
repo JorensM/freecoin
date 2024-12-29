@@ -37,15 +37,9 @@ module.exports = class FreeNode {
                 status: "approved",
                 amount: amountApproved
             })
-            return;
-            // }
-            res.status(400).json({
-                status: "error",
-                message: "unknown type"
-            })
         })
 
-        this.server.post('/transfer', (req, res) => {
+        this.server.post('/transfers', (req, res) => {
             const type = req.body.type;
             const from = req.body.from;
             const to = req.body.to;
@@ -57,13 +51,22 @@ module.exports = class FreeNode {
                     from,
                     amount
                 ));
+                console.log(this.pendingTransfers);
                 res.json({
                     status: "success"
-                })
+                });
+                return;
             } else if(type === 'receive') {
                 const transfers = this.pendingTransfers.filter(transfer => (
-                    transfer.to ===
-                ))
+                    transfer.to === to &&
+                    transfer.from === from
+                ));
+                const sum = transfers.length ? transfers.map(transfer => transfer.amount).reduce((prev, curr) => prev + curr) : 0;
+                this.pendingTransfers = this.pendingTransfers.filter(transfer => !transfers.includes(transfer));
+                res.json({
+                    status: transfers.length ? "success" : "no-transfers",
+                    amount: sum
+                })
             }
         });
 
