@@ -1,21 +1,18 @@
-const FreeWallet = require('./wallet/wallet.js');
-const wallet = new FreeWallet('w1');
-const wallet2 = new FreeWallet('w2')
+const FreeWalletV0 = require('./wallet/walletv0.js');
+const wallet = new FreeWalletV0('t1');
+const wallet2 = new FreeWalletV0();
 
-const NODE_URL = 'http://localhost:7433';
+const WALLET_1_URL = 'http://localhost:7433';
+const WALLET_2_URL = 'http://localhost:7434';
 
 const runTest = async () => {
     
-    await wallet.request(NODE_URL, 5);
-    console.log(wallet.balance);
+    wallet.startApp();
+    wallet2.startApp(7434);
 
-    await wallet.transfer(NODE_URL, 2, 'w2');
+    wallet2.receive('t1');
 
-    console.log(wallet.balance);
-
-    await wallet2.receive(NODE_URL, 'w1');
-
-    console.log(wallet2.balance);
+    await wallet.send(WALLET_2_URL)
 }
 
 runTest();
