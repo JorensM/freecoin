@@ -10,9 +10,9 @@ const runTest = async () => {
     wallet.startApp();
     wallet2.startApp(7434);
 
-    wallet2.receive('t1');
+    wallet2.receive('key');
 
-    await wallet.send(WALLET_2_URL)
+    await wallet.send(1, WALLET_2_URL, 'key')
 }
 
 runTest();
