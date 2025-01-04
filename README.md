@@ -29,14 +29,17 @@ const encryptHistory = (history, initialKey, reverse = false) => {
     return newHistory;
 }
 ```
-Each next encryption is hashed with sha-256 by combining the previous encryption (or the initial key, for the initial encription), with the resulting balances of the wallets after the transaction
-There are two ways - regular and reverse encryption. In a regular encryption, the encryption process starts with the last transaction (in this case the last transaction is the first item in the array)
-And reverse encryption encrypts the data starting from the first transaction
-jorens — Today at 8:19 PM
-With regular encryption, the last transaction is the least complex one and the easiest to crack, and the first one is the most complex, with reverse encryption, it's the other way around - the last transaction is the most complex one and the first one is the simplest
+The entire transaction history gets encrypted step by step, building on the previous encryption (resursive encryption). Each next encryption is hashed with sha-256 by combining the previous encryption (or the initial key, for the initial encryption), with the resulting balances of the wallets after the given transaction.
+
+There are two ways - regular and reverse encryption. 
+
+In a regular encryption, the encryption process starts with the last transaction (in this case the last transaction is the first item in the array) meanwhile reverse encryption encrypts the data starting from the first transaction (in this case the last item in the array).
+
+With regular encryption, the last transaction is the least complex one and the easiest to crack, and the first one is the most complex. With reverse encryption, it's the other way around - the last transaction is the most complex one and the first one is the simplest.
+
 With regular encryption, it's possible to verify when the 'trail' ends and when there are no more transactions to be made between the wallets
-Because the last encrypted token in the transaction history will be equal to the initial key
-So by using the initial key as the token you can check whether the given transaction is supposed to be the final one
+Because the last encrypted token in the transaction history will be equal to the initial key (in this case 'freewallet')
+
 Meanwhile with reverse encryption, the first transaction is verified by using the initial key ('freewallet' in this case), so theoretically there would be no way to confirm whether a given transaction is the last one or not
 
 Here is some logs from the weird crypto (the one in walletf.js)
