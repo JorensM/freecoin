@@ -1,32 +1,68 @@
-
+const crypto = require('crypto');
 
 
 const wallet1 = [
     5,
     2,
     5,
-    4
+    4,
+    4,
+    1,
+    2,
+    1,
+    2,
+    1,
+    2,
+    5,
+    5,
+    5,
+    5,
+    7,
+    1,
+    7,
 ]
+
 
 const wallet2 = [
     5,
     9,
     6,
+    7,
+    7,
+    1,
+    7,
+    4,
+    7,
+    4,
+    7,
+    7,
+    4,
+    2,
+    7,
+    2,
+    1,
     7
 ]
 
-const encrypt = (str, key) => {
-    return str.toString() + key.toString();
-}
-
 /**
  * 
- * @param { string } str 
- * @param {*} key 
+ * @param { string } token 
+ * @param { string } key 
  * @returns 
  */
-const decrypt = (str, key) => {
-    return str.substring(0, str.length - key.length);
+const encryptToken = (token, key) => {
+    //return (token + key + 5);
+    return crypto.hash('sha256', token + key);
+}
+
+const verifyToken = (encryptedToken, token, key) => {
+    const matchedToken = encryptToken(token, key);
+    return encryptedToken === matchedToken;
+}
+
+const createTransactionHistory = (wallet1, wallet2) => {
+    const combined = wallet1.map((item, index) => item + ':' + wallet2[index]);
+    return combined;
 }
 
 /**
@@ -34,29 +70,24 @@ const decrypt = (str, key) => {
  * @param { number[] } history 
  * @returns 
  */
-const encryptHistories = (history1, history2, initialKey) => {
+const encryptHistory = (history, initialKey, reverse = false) => {
     let newHistory = [];
     let latestEncryption = initialKey;
-    for(let i = history1.length - 1; i >= 0; i--) {
-        latestEncryption = encrypt(latestEncryption, history1[i] + ':' + history2[i]);
-        console.log(latestEncryption);
-        newHistory.unshift(latestEncryption);
+    if(reverse) {
+        for(let i = history.length - 1; i >= 0; i--) {
+            latestEncryption = encryptToken(latestEncryption, history[i]);
+            newHistory.unshift(latestEncryption);
+        }    
+    } else {
+        for(let i = 0; i < history.length; i++) {
+            latestEncryption = encryptToken(latestEncryption, history[i]);
+            newHistory.push(latestEncryption);
+        }
     }
+    
     return newHistory;
 }
 
-// /**
-//  * 
-//  * @param { string } item 
-//  * @param {*} key 
-//  * @param {*} w1 
-//  * @param {*} w2 
-//  * @param {*} amount 
-//  */
-// const decrypt = (item, key, w1, w2, amount) => {
-//     let part = item.replace(w1, '').replace(w2, '').replaceAll(key, '').split(':');
-//     return [parseInt(part[0]), parseInt(part[1])];
-// }
 
 /**
  * 
@@ -65,24 +96,61 @@ const encryptHistories = (history1, history2, initialKey) => {
  * @param {*} sender 
  * @param {*} recipient 
  */
-const verifyTransaction = (item, key, trail) => {
-    // const firstItem = encryptedHistory.pop();
-    const decrypted = decrypt(item, trail);
-    console.log(item);
-    console.log(decrypted);
-    return decrypted === key ? trail : false;
+const verifyTransaction = (item, token, trail) => {
+    const valid = verifyToken(item, token, trail);
+    return valid ? trail : false;
 }
 
+const verifyReverseTransaction = (item, token, balance) => {
+    const valid = verifyToken(item, token, balance);
+    
+    const encryptedToken = encryptToken(token, balance);
 
-const encryptedHistories = encryptHistories(wallet1, wallet2, 'freewallet');
+    return valid ? encryptedToken : false;
+}
 
-console.log(encryptedHistories)
+const history = createTransactionHistory(wallet1, wallet2);
+const encryptedHistory = encryptHistory(history, 'freewallet');
+const reverseEncryptedHistory = encryptHistory(history, 'freewallet', true);
 
-const first = verifyTransaction(encryptedHistories.pop(), 'freewallet', '4:7');
-console.log(first);
-const second = verifyTransaction(encryptedHistories.pop(), 'freewallet', first + '6:5');
-console.log(second);
-const third = verifyTransaction(encryptedHistories.pop(), 'freewallet', second + '9:2');
-console.log(third);
-const fourth = verifyTransaction(encryptedHistories.pop(), 'freewallet', third + '5:5');
-console.log(fourth);
+console.log('history:', history);
+console.log('encrypted history: ', encryptedHistory);
+
+const getNext = () => encryptedHistory[encryptedHistory.length - 1];
+
+const test = () => {
+    console.log('testing');
+    let trail = '';
+    for(let i = history.length - 1; i >= 0; i--) {
+        console.log('---------')
+        const item = encryptedHistory.pop();
+        const balance = history[i];
+        console.log('item: ', item);
+        trail = verifyTransaction(item, getNext(), balance);
+        console.log('verified: ', !!trail);
+        console.log('next trail: ', trail);
+        console.log('---------')
+    }
+}
+
+const testReverse = (encryptedHistory) => {
+    console.log('testing reverse');
+    trail = 'freewallet';
+    for(let i = history.length - 1; i >= 0; i--) {
+        console.log('---------')
+        const item = encryptedHistory.pop();
+        const balance = (history[i]);
+        console.log('item: ', item);
+        trail = verifyReverseTransaction(item, trail, balance);
+        console.log('verified: ', !!trail);
+        console.log('next trail: ', trail);
+        console.log('---------')
+
+    }
+}
+
+test();
+
+console.log('reverse encrypted history:', reverseEncryptedHistory);
+
+testReverse(reverseEncryptedHistory);
