@@ -2,6 +2,44 @@
 
 Cryptocurrency that is free
 
+Basically the idea is that if you know the next address that your next transaction must occur with, the entire history of transactions between two wallets before they occur, it's possible to create a literally fully decentralized peer-to-peer system.
+Like absolutely decentralized, there would be no nodes or no servers that need to keep track of transactions and balances, just wallets.
+ 
+In such a way you can store the information itself about the transactions and balances as the address of the wallet.
+
+So yeah in theory if it was possible to somehow know or determine the history of transactions between two wallets in advance, it would be possible to have a completely decentralized system.
+
+Because the transaction and balance data could be encrypted as the wallet's address 
+Here is the code that encrypts the history of transactions:
+```
+const encryptHistory = (history, initialKey, reverse = false) => {
+    let newHistory = [];
+    let latestEncryption = initialKey;
+    if(reverse) {
+        for(let i = history.length - 1; i >= 0; i--) {
+            latestEncryption = encryptToken(latestEncryption, history[i]);
+            newHistory.unshift(latestEncryption);
+        }    
+    } else {
+        for(let i = 0; i < history.length; i++) {
+            latestEncryption = encryptToken(latestEncryption, history[i]);
+            newHistory.push(latestEncryption);
+        }
+    }
+    
+    return newHistory;
+}
+```
+Each next encryption is hashed with sha-256 by combining the previous encryption (or the initial key, for the initial encription), with the resulting balances of the wallets after the transaction
+There are two ways - regular and reverse encryption. In a regular encryption, the encryption process starts with the last transaction (in this case the last transaction is the first item in the array)
+And reverse encryption encrypts the data starting from the first transaction
+jorens — Today at 8:19 PM
+With regular encryption, the last transaction is the least complex one and the easiest to crack, and the first one is the most complex, with reverse encryption, it's the other way around - the last transaction is the most complex one and the first one is the simplest
+With regular encryption, it's possible to verify when the 'trail' ends and when there are no more transactions to be made between the wallets
+Because the last encrypted token in the transaction history will be equal to the initial key
+So by using the initial key as the token you can check whether the given transaction is supposed to be the final one
+Meanwhile with reverse encryption, the first transaction is verified by using the initial key ('freewallet' in this case), so theoretically there would be no way to confirm whether a given transaction is the last one or not
+
 Here is some logs from the weird crypto (the one in walletf.js)
 
 ```
@@ -290,41 +328,3 @@ verified:  true
 next trail:  ba26dc220cc3cc9daac99d88c0f017a23056a5978e6f8ecfc680c9fa31595fb7
 ---------
 ```
-
-Basically the idea is that if you know the next address that your next transaction must occur with, the entire history of transactions between two wallets before they occur, it's possible to create a literally fully decentralized peer-to-peer system.
-Like absolutely decentralized, there would be no nodes or no servers that need to keep track of transactions and balances, just wallets.
- 
-In such a way you can store the information itself about the transactions and balances as the address of the wallet.
-
-So yeah in theory if it was possible to somehow know or determine the history of transactions between two wallets in advance, it would be possible to have a completely decentralized system.
-
-Because the transaction and balance data could be encrypted as the wallet's address 
-Here is the code that encrypts the history of transactions:
-```
-const encryptHistory = (history, initialKey, reverse = false) => {
-    let newHistory = [];
-    let latestEncryption = initialKey;
-    if(reverse) {
-        for(let i = history.length - 1; i >= 0; i--) {
-            latestEncryption = encryptToken(latestEncryption, history[i]);
-            newHistory.unshift(latestEncryption);
-        }    
-    } else {
-        for(let i = 0; i < history.length; i++) {
-            latestEncryption = encryptToken(latestEncryption, history[i]);
-            newHistory.push(latestEncryption);
-        }
-    }
-    
-    return newHistory;
-}
-```
-Each next encryption is hashed with sha-256 by combining the previous encryption (or the initial key, for the initial encription), with the resulting balances of the wallets after the transaction
-There are two ways - regular and reverse encryption. In a regular encryption, the encryption process starts with the last transaction (in this case the last transaction is the first item in the array)
-And reverse encryption encrypts the data starting from the first transaction
-jorens — Today at 8:19 PM
-With regular encryption, the last transaction is the least complex one and the easiest to crack, and the first one is the most complex, with reverse encryption, it's the other way around - the last transaction is the most complex one and the first one is the simplest
-With regular encryption, it's possible to verify when the 'trail' ends and when there are no more transactions to be made between the wallets
-Because the last encrypted token in the transaction history will be equal to the initial key
-So by using the initial key as the token you can check whether the given transaction is supposed to be the final one
-Meanwhile with reverse encryption, the first transaction is verified by using the initial key ('freewallet' in this case), so theoretically there would be no way to confirm whether a given transaction is the last one or not
