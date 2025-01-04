@@ -126,9 +126,11 @@ const test = () => {
         const item = encryptedHistory.pop();
         const balance = history[i];
         console.log('item: ', item);
-        trail = verifyTransaction(item, getNext(), balance);
+        console.log('transaction:', balance);
+        console.log(i);
+        trail = verifyTransaction(item, getNext() || 'freewallet', balance);
         console.log('verified: ', !!trail);
-        console.log('next trail: ', trail);
+        console.log('next trail: ', getNext() || 'freewallet (trail ended)');
         console.log('---------')
     }
 }
@@ -141,6 +143,7 @@ const testReverse = (encryptedHistory) => {
         const item = encryptedHistory.pop();
         const balance = (history[i]);
         console.log('item: ', item);
+        console.log('transaction:', balance);
         trail = verifyReverseTransaction(item, trail, balance);
         console.log('verified: ', !!trail);
         console.log('next trail: ', trail);
