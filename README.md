@@ -7,9 +7,8 @@ Like absolutely decentralized, there would be no nodes or no servers that need t
  
 In such a way you can store the information itself about the transactions and balances as the address of the wallet.
 
-So yeah in theory if it was possible to somehow know or determine the history of transactions between two wallets in advance, it would be possible to have a completely decentralized system.
+So yeah in theory if it was possible to somehow know or determine the history of transactions between two wallets in advance, it would be possible to have a completely decentralized system, because the transaction and balance data could be encrypted as the wallet's address 
 
-Because the transaction and balance data could be encrypted as the wallet's address 
 Here is the code that encrypts the history of transactions:
 ```
 const encryptHistory = (history, initialKey, reverse = false) => {
